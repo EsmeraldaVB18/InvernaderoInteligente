@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css?v=2.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Invernadero Inteligente - Sistema Web</title>
+  <script>
+    (function () {
+      var t = localStorage.getItem('tema') || 'verde';
+      var map = { verde: 'tema-verde', azul: 'tema-azul', oscuro: 'tema-oscuro' };
+      document.documentElement.className = map[t] || 'tema-verde';
+    })();
+  </script>
+  <script>
+    (function () {
+      // Verificar sesión
+      const enSession = sessionStorage.getItem("logueado") === "true";
+      const enLocal = localStorage.getItem("logueado") === "true";
+
+      if (!enSession && !enLocal) {
+        window.location.replace("login.html");
+        return;
+      }
+
+      // Si solo está en localStorage
+      if (!enSession && enLocal) {
+        sessionStorage.setItem("logueado", localStorage.getItem("logueado"));
+        sessionStorage.setItem("usuario_id", localStorage.getItem("usuario_id"));
+        sessionStorage.setItem("nombreUsuario", localStorage.getItem("nombreUsuario"));
+        const foto = localStorage.getItem("foto_perfil");
+        if (foto) sessionStorage.setItem("foto_perfil", foto);
+      }
+    })();
+
+    // Evitar carga desde caché
+    window.addEventListener("pageshow", function (event) {
+      const enSession = sessionStorage.getItem("logueado") === "true";
+      const enLocal = localStorage.getItem("logueado") === "true";
+      if (!enSession && !enLocal) {
+        window.location.replace("login.html");
+      }
+    });
+  </script>
+</head>
+
+<body style="display: none;">
+  <script>
+    if (sessionStorage.getItem("logueado") === "true" || localStorage.getItem("logueado") === "true") {
+      document.body.style.display = "";
+    }
+  </script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo2.png" alt="Logo" class="logo-img">
+      <span>Invernadero<br>Inteligente<br>UPALT</span>
+    </div>
+    <nav>
+      <a href="#" id="navAnalisis" class="active"><span class="nav-icon">🪴</span> Análisis de Albahaca</a>
+      <a href="#" id="navGaleria"><span class="nav-icon">🖼️</span> Galería de Diagnósticos</a>
+      <a href="#" id="navEstadisticas"><span class="nav-icon">📈</span> Estadísticas</a>
+    </nav>
+  </aside>
+
+
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="hamburger" id="hamburger">☰</span>
+        <h1>Panel de Diagnóstico 🌿</h1>
+      </div>
+      <div class="topbar-right">
+
+        <!-- Dropdown de temas -->
+        <div class="tema-picker" id="temaPicker">
+          <button id="btnTema" class="btn-topbar btn-tema" title="Cambiar tema">
+            <span class="tema-swatch" id="temaSwatch"></span>
+            <span id="temaNombre">Verde</span>
+            <span style="font-size:10px;opacity:.6;">▾</span>
+          </button>
+          <div class="tema-dropdown" id="temaDropdown">
+            <button class="tema-opt" data-tema="verde">
+              <span class="swatch swatch-verde"></span> Verde
+            </button>
+            <button class="tema-opt" data-tema="azul">
+              <span class="swatch swatch-azul"></span> Azul
+            </button>
+            <button class="tema-opt" data-tema="oscuro">
+              <span class="swatch swatch-oscuro"></span> Oscuro
+            </button>
+          </div>
+        </div>
+
+        <!-- Menú de usuario -->
+        <div class="user-dropdown-container">
+          <div class="user-dropdown-trigger" id="userDropdownTrigger">
+            <div class="user-avatar" id="userAvatar">👤</div>
+            <strong id="nombreUsuario">Administrador</strong>
+            <span class="user-dropdown-arrow">▾</span>
+          </div>
+          <div class="user-dropdown-panel" id="userDropdownPanel">
+            <div class="udp-profile-row">
+              <div class="udp-mini-avatar" id="udpMiniAvatar">👤</div>
+              <div class="udp-profile-info">
+                <strong id="udpNombreDisplay">Administrador</strong>
+                <span id="udpUsuarioDisplay">@usuario</span>
+              </div>
+            </div>
+            <div class="udp-menu">
+              <button class="udp-menu-item" id="btnIrEditarPerfil">
+                <span>✏️</span> Editar perfil
+              </button>
+              <button class="udp-menu-item" id="btnIrCambiarPass">
+                <span>🔒</span> Cambiar contraseña
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button id="logoutBtn" class="btn-topbar btn-logout" title="Cerrar sesión">
+          <span class="btn-icon"> </span> Salir
+        </button>
+
+      </div>
+    </header>
+
+    <!-- Contenido -->
+    <main class="content">
+
+      <!-- Banner superior moderno -->
+      <div class="hero-banner" id="heroBanner">
+        <div class="hero-content">
+          <h1 class="hero-title">Análisis de <span class="highlight">Albahaca</span></h1>
+          <h2 class="hero-subtitle">Diagnóstico inteligente mediante IA</h2>
+          <p class="hero-text"><i class="fas fa-camera" style="margin-right: 6px; opacity: 0.8;"></i>Sube una imagen de tu planta para comenzar</p>
+        </div>
+        <div class="hero-image-wrap">
+          <div class="hero-glow"></div>
+          <!-- Partículas de luz -->
+          <div class="hero-particle particle-1"></div>
+          <div class="hero-particle particle-2"></div>
+          <div class="hero-particle particle-3"></div>
+          <!-- Hojas flotantes SVG -->
+          <svg class="hero-leaf leaf-1" viewBox="0 0 24 24">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+          </svg>
+          <svg class="hero-leaf leaf-2" viewBox="0 0 24 24">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+          </svg>
+          <svg class="hero-leaf leaf-3" viewBox="0 0 24 24">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+          </svg>
+          <!-- Planta sin fondo -->
+          <img src="basil_plant.png" class="hero-plant" alt="Planta de Albahaca">
+        </div>
+      </div>
+
+      <!-- CARDS -->
+      <div class="cards-row">
+
+        <!-- Card 1: Subir imagen -->
+        <div class="card">
+          <div class="card-title"><span class="ci">⬆️</span> 1. Subir imagen</div>
+
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon" id="uploadIcon">☁️</div>
+            <p id="uploadText">Arrastra tu imagen aquí<br>o selecciona un archivo</p>
+          </div>
+
+          <button class="btn btn-outline-green" id="btnArchivo">📁 Seleccionar archivo</button>
+          <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" hidden>
+
+          <div class="or-divider">o</div>
+
+          <button class="btn" id="btnCamara">📷 Tomar fotografía</button>
+          <video id="video" width="100%" autoplay style="display:none; border-radius:8px; margin-bottom:8px;"></video>
+          <button class="btn btn-green" id="capturar" style="display:none;">📸 Capturar foto</button>
+          <canvas id="canvas" style="display:none;"></canvas>
+
+          <div class="file-hint">Formatos permitidos: JPG, PNG, JPEG<br>Tamaño máximo: 10MB</div>
+        </div>
+
+        <!-- Card 2: Vista previa -->
+        <div class="card">
+          <div class="card-title"><span class="ci">👁️</span> 2. Vista previa</div>
+
+          <div class="preview-placeholder" id="previewPlaceholder">
+            <span style="font-size:40px;">🌱</span>
+            <p style="font-size:12px; color:#aaa; margin-top:8px;">Sin imagen cargada</p>
+          </div>
+
+          <img id="previewImage" class="preview-img" style="display:none;" alt="Vista previa">
+
+          <div class="file-row" id="fileInfo" style="display:none;">
+            <span id="nombreArchivo">Sin archivo</span>
+            <span id="eliminarImagen" style="cursor:pointer;" title="Eliminar imagen">🗑️</span>
+          </div>
+
+          <div class="success-badge" id="mensajeCarga" style="display:none;">
+            <div class="dot">✓</div>
+            <span id="tamanoArchivo"></span>
+          </div>
+
+          <button class="btn btn-green" id="analizarBtn">🔍 Analizar imagen</button>
+        </div>
+
+        <!-- Card 3: Estado del análisis -->
+        <div class="card">
+          <div class="card-title"><span class="ci">📈</span> Estado del análisis</div>
+          <div class="status-center">
+            <div class="spinner" id="spinner"></div>
+            <div class="status-text" id="statusText">Esperando imagen...</div>
+            <div class="status-sub" id="statusSub">Carga una imagen y presiona<br>Analizar para comenzar.</div>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="progress-label" id="progressLabel">0%</div>
+          <div class="info-box">
+            <span class="info-icon">ℹ️</span>
+            <span>Nuestro modelo de IA revisará las características de la planta.</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Resultado -->
+        <div class="card">
+          <div class="card-title"><span class="ci">📋</span> 3. Resultado del análisis</div>
+
+          <div class="alert-red" id="estadoResultado" style="display:none;">
+            <span id="estadoBadge">⚠️</span> <span id="estadoTexto">Resultado disponible</span>
+          </div>
+
+          <div class="result-row">
+            <div>
+              <div class="result-label">Diagnóstico</div>
+              <div class="result-value" id="resultado">Sin analizar</div>
+            </div>
+            <div>
+              <div class="result-label" style="text-align:right">Confianza</div>
+              <div class="circle-wrap">
+                <svg width="62" height="62" viewBox="0 0 62 62">
+                  <circle class="circle-bg" cx="31" cy="31" r="26" />
+                  <circle class="circle-fill" cx="31" cy="31" r="26" id="circleFill" />
+                </svg>
+                <div class="circle-label" id="confianza">0%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="meta-label">Fecha y hora</div>
+          <div class="meta-row" id="fechaAnalisis">Sin análisis</div>
+
+          <div class="meta-label">Descripción</div>
+          <div class="desc-text" id="descripcionResultado">Esperando análisis...</div>
+
+          <div class="rec-box" id="recomendacion">
+            <strong>💡 Recomendación</strong>
+            Aún no disponible.
+          </div>
+
+          <!-- Código de análisis -->
+          <div class="codigo-analisis" style="display: none;">
+            <span class="codigo-label">Código:</span>
+            <span class="codigo-valor" id="codigoAnalisis">—</span>
+          </div>
+
+
+          <div class="action-row-3">
+            <button class="btn-action btn-action-escuchar" id="leerResultado">
+              <span class="ba-icon">🔊</span>
+              <span class="ba-label">Escuchar</span>
+            </button>
+            <button class="btn-action btn-action-pdf" id="guardarDiagnostico">
+              <span class="ba-icon">📄</span>
+              <span class="ba-label">Guardar PDF</span>
+            </button>
+            <button class="btn-action btn-action-nuevo" id="nuevoAnalisis">
+              <span class="ba-icon">🔄</span>
+              <span class="ba-label">Nuevo</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="history-card" id="seccionHistorial">
+        <div class="history-header">
+          <div class="history-title">🕐 &nbsp;Historial de análisis</div>
+          <div class="history-controls">
+            <div class="search-box">
+              <span>🔍</span>
+              <input type="text" id="searchInput" placeholder="Buscar..." />
+            </div>
+            <div class="filter-btn" id="btnFiltrar">📅 Filtrar por fecha &nbsp;▾</div>
+          </div>
+        </div>
+
+        <table id="tablaHistorial">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fecha y hora</th>
+              <th>Imagen</th>
+              <th>Diagnóstico</th>
+              <th>Confianza</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="historialBody">
+            <tr id="emptyRow">
+              <td colspan="7" style="text-align:center; color:#aaa; padding:30px;">
+                Sin registros aún. Analiza una imagen para comenzar.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="see-more" id="seeMoreWrap" style="display:none;">
+          <button id="verMasBtn">Ver más registros &nbsp;▾</button>
+        </div>
+      </div>
+
+
+      <section class="galeria-section" id="seccionGaleria" style="display:none;">
+
+        <div class="galeria-header">
+          <div class="galeria-header-top">
+
+            <div class="galeria-inner-heading">
+              <div class="galeria-icon-wrap">
+                <!-- Ícono hoja (Lucide Leaf) -->
+                <svg class="galeria-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+                  <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                </svg>
+              </div>
+              <div>
+                <h2 class="galeria-inner-title">Tus Diagnósticos</h2>
+                <p class="galeria-inner-subtitle">Imágenes obtenidas durante cada análisis</p>
+              </div>
+            </div>
+
+            <div class="galeria-counter" id="galeriaCounter">
+              <span class="galeria-counter-num" id="galeriaCounterNum">0</span>
+              <span class="galeria-counter-lbl">diagnósticos</span>
+            </div>
+          </div>
+
+          <div class="galeria-toolbar">
+            <div class="galeria-search-wrap">
+              <span class="galeria-search-icon">🔍</span>
+              <input type="text" id="galeriaBuscador" class="galeria-search-input"
+                placeholder="Buscar por diagnóstico..." autocomplete="off">
+              <button class="galeria-search-clear" id="galeriaClearSearch" title="Limpiar búsqueda"
+                style="display:none;">✕</button>
+            </div>
+            <div class="galeria-filter-wrap">
+              <label class="galeria-filter-label" for="galeriaFiltroTipo">Filtrar:</label>
+              <select id="galeriaFiltroTipo" class="galeria-filter-select">
+                <option value="todos">🌿 Todos</option>
+                <option value="sana">✅ Sana</option>
+                <option value="plaga">⚠️ Plaga / Enfermedad</option>
+              </select>
+            </div>
+
+            <div class="galeria-result-count" id="galeriaResultCount" style="display:none;"></div>
+          </div>
+        </div>
+
+
+        <div class="galeria-empty" id="galeriaEmpty" style="display:none;">
+          <div class="galeria-empty-icon" id="galeriaEmptyIcon">🌿</div>
+          <p class="galeria-empty-title" id="galeriaEmptyTitle">Sin diagnósticos registrados</p>
+          <p class="galeria-empty-sub" id="galeriaEmptySub">Analiza una imagen de albahaca para ver tus resultados aquí.
+          </p>
+        </div>
+
+        <div class="galeria-grid" id="galeriaGrid"></div>
+      </section>
+
+      <section class="estadisticas-section" id="seccionEstadisticas" style="display:none; padding: 24px;">
+
+        <div class="stats-header-modern">
+          <div class="shm-icon">📊</div>
+          <div>
+            <h2>Estadísticas</h2>
+            <p>Resumen de los diagnósticos realizados</p>
+          </div>
+        </div>
+
+        <div class="stats-grid-4">
+          <!-- Card 1 -->
+          <div class="sm-card sm-summary-card">
+            <div class="sm-icon-wrap" style="color: #2e7d32; background: #e8f5e9;">📋</div>
+            <div class="sm-data">
+              <div class="sm-title">Total de análisis</div>
+              <div class="sm-value" id="sm-total">0</div>
+              <div class="sm-sub">Diagnósticos realizados</div>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="sm-card sm-summary-card">
+            <div class="sm-icon-wrap" style="color: #388e3c; background: #e8f5e9;">🪴</div>
+            <div class="sm-data">
+              <div class="sm-title">Plantas sanas</div>
+              <div class="sm-value" id="sm-sanas" style="color: #388e3c;">0</div>
+              <div class="sm-sub" id="sm-sanas-pct">0% del total</div>
+            </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="sm-card sm-summary-card">
+            <div class="sm-icon-wrap" style="color: #d32f2f; background: #ffebee;">🐞</div>
+            <div class="sm-data">
+              <div class="sm-title">Plantas con plagas</div>
+              <div class="sm-value" id="sm-plagas" style="color: #d32f2f;">0</div>
+              <div class="sm-sub" id="sm-plagas-pct">0% del total</div>
+            </div>
+          </div>
+          <!-- Card 4 -->
+          <div class="sm-card sm-summary-card">
+            <div class="sm-icon-wrap" style="color: #1976d2; background: #e3f2fd;">🎯</div>
+            <div class="sm-data">
+              <div class="sm-title">Confianza promedio</div>
+              <div class="sm-value" id="sm-confianza" style="color: #1976d2;">0%</div>
+              <div class="sm-sub">Promedio de confianza</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid-2">
+          <!-- Chart 1 -->
+          <div class="sm-card">
+            <h3 class="sm-card-title">Estado general de los diagnósticos</h3>
+            <div class="sm-donut-layout">
+              <div class="sm-donut-container">
+                <canvas id="smChartDistribucion"></canvas>
+                <div class="sm-donut-center">
+                  <div class="sm-dc-val" id="sm-dc-val">0%</div>
+                  <div class="sm-dc-lbl">Sanas</div>
+                </div>
+              </div>
+              <div class="sm-donut-legend">
+                <div class="sm-dl-item">
+                  <div class="sm-dl-dot" style="background:#4caf50;"></div>
+                  <span class="sm-dl-lbl">Plantas sanas</span>
+                  <span class="sm-dl-val" id="sm-leg-sanas">0 (0%)</span>
+                </div>
+                <div class="sm-dl-item">
+                  <div class="sm-dl-dot" style="background:#f44336;"></div>
+                  <span class="sm-dl-lbl">Con plagas</span>
+                  <span class="sm-dl-val" id="sm-leg-plagas" style="color:#d32f2f;">0 (0%)</span>
+                </div>
+              </div>
+            </div>
+            <div class="sm-alert-box" id="sm-alert-estado">
+              <span class="sm-alert-icon">🌿</span>
+              <span id="sm-alert-estado-text">Esperando diagnósticos...</span>
+            </div>
+          </div>
+          <!-- Chart 2 -->
+          <div class="sm-card">
+            <h3 class="sm-card-title">Plagas más detectadas</h3>
+            <div class="sm-bar-container">
+              <canvas id="smChartPlagas"></canvas>
+            </div>
+            <div class="sm-bar-footer">Cantidad de diagnósticos</div>
+          </div>
+        </div>
+
+        <div class="stats-grid-2-bottom">
+          <!-- Resumen General -->
+          <div class="sm-card sm-bg-lightgreen">
+            <h3 class="sm-card-title" style="margin-bottom: 20px; text-align: center;">Resumen general</h3>
+            <div class="sm-resumen-layout">
+              <div class="sm-resumen-icon">📋</div>
+              <ul class="sm-resumen-list">
+                <li><span class="sm-check">✅</span> <span class="sm-rl-lbl">Total de diagnósticos realizados:</span>
+                  <strong id="sm-rl-total" class="sm-rl-val">0</strong>
+                </li>
+                <li><span class="sm-check">✅</span> <span class="sm-rl-lbl">Plantas sanas:</span> <strong
+                    id="sm-rl-sanas" class="sm-rl-val">0 (0%)</strong></li>
+                <li><span class="sm-check">✅</span> <span class="sm-rl-lbl">Plantas con plagas:</span> <strong
+                    id="sm-rl-plagas" class="sm-rl-val" style="color:#d32f2f;">0 (0%)</strong></li>
+                <li><span class="sm-check">✅</span> <span class="sm-rl-lbl">Plaga más frecuente:</span> <strong
+                    id="sm-rl-frecuente" class="sm-rl-val">Ninguna</strong></li>
+                <li><span class="sm-check">✅</span> <span class="sm-rl-lbl">Promedio de confianza:</span> <strong
+                    id="sm-rl-confianza" class="sm-rl-val">0%</strong></li>
+                <li><span class="sm-check">✅</span> <span class="sm-rl-lbl">Último análisis:</span> <strong
+                    id="sm-rl-ultimo" class="sm-rl-val" style="color:#2e7d32;">Ninguno</strong></li>
+              </ul>
+            </div>
+          </div>
+          <!-- Ultimo Diagnostico -->
+          <div class="sm-card sm-bg-lightyellow">
+            <h3 class="sm-card-title" style="margin-bottom: 20px; text-align: center;">Último diagnóstico</h3>
+            <div class="sm-ultimo-layout">
+              <div class="sm-ultimo-icon" id="sm-ud-icon">🌿</div>
+              <div class="sm-ultimo-details">
+                <div class="sm-ud-title" id="sm-ud-diag" style="color:#2e7d32;">Ninguno</div>
+                <div class="sm-ud-row">📅 <span id="sm-ud-fecha">--/--/----</span></div>
+                <div class="sm-ud-row">🎯 <span id="sm-ud-confianza">0% de confianza</span></div>
+              </div>
+            </div>
+            <div class="sm-alert-box-yellow" style="margin-top:20px;">
+              <span class="sm-alert-icon">⭐</span>
+              <span id="sm-alert-ultimo-text">Esperando diagnóstico.</span>
+            </div>
+          </div>
+        </div>
+
+
+      </section>
+
+      <!-- ───── EDITAR PERFIL ───── -->
+      <section class="perfil-form-section" id="seccionEditarPerfil" style="display:none; padding:24px;">
+        <div class="stats-header-modern">
+          <div class="shm-icon">✏️</div>
+          <div>
+            <h2>Editar perfil</h2>
+            <p>Actualiza tu información personal</p>
+          </div>
+        </div>
+        <div class="perfil-form-container">
+          <div class="perfil-form-card">
+            <div class="pfc-avatar-wrap">
+              <label for="editFotoInput" class="pfc-avatar-label">
+                <div class="pfc-avatar-preview" id="editAvatarPreview">👤</div>
+                <div class="pfc-avatar-overlay">📷 Cambiar foto</div>
+              </label>
+              <input type="file" id="editFotoInput" accept="image/jpeg,image/png,image/jpg" hidden>
+              <p class="pfc-avatar-hint">JPG o PNG · Máx. 5 MB</p>
+            </div>
+            <div class="pfc-fields">
+              <div class="pfc-row">
+                <div class="pfc-field">
+                  <label for="editNombre">Nombre</label>
+                  <input type="text" id="editNombre" placeholder="Tu nombre" required>
+                </div>
+                <div class="pfc-field">
+                  <label for="editApellido">Apellido</label>
+                  <input type="text" id="editApellido" placeholder="Tu apellido" required>
+                </div>
+              </div>
+              <div class="pfc-field">
+                <label for="editCorreo">Correo electrónico</label>
+                <input type="email" id="editCorreo" placeholder="tucorreo@ejemplo.com" required>
+              </div>
+              <div class="pfc-field">
+                <label for="editUsuarioRO">Usuario</label>
+                <input type="text" id="editUsuarioRO" disabled>
+              </div>
+            </div>
+            <div class="pfc-actions">
+              <button class="btn btn-green" id="btnGuardarEditPerfil">Guardar cambios</button>
+              <button class="btn btn-outline-green" id="btnCancelarEditPerfil">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───── CAMBIAR CONTRASEÑA ───── -->
+      <section class="perfil-form-section" id="seccionCambiarPass" style="display:none; padding:24px;">
+        <div class="stats-header-modern">
+          <div class="shm-icon">🔒</div>
+          <div>
+            <h2>Cambiar contraseña</h2>
+            <p>Elige una contraseña segura</p>
+          </div>
+        </div>
+        <div class="perfil-form-container">
+          <div class="perfil-form-card" style="max-width:460px;">
+            <div class="pfc-fields">
+              <div class="pfc-field">
+                <label for="passNueva">Nueva contraseña</label>
+                <input type="password" id="passNueva" placeholder="Mínimo 6 caracteres">
+              </div>
+              <div class="pfc-field">
+                <label for="passConfirmar">Confirmar contraseña</label>
+                <input type="password" id="passConfirmar" placeholder="Repite la nueva contraseña">
+              </div>
+            </div>
+            <div class="pfc-actions">
+              <button class="btn btn-green" id="btnGuardarPass">Cambiar contraseña</button>
+              <button class="btn btn-outline-green" id="btnCancelarPass">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+
+  <!-- Modal advertencia: análisis no válido -->
+  <div class="warn-modal-overlay" id="warnModalOverlay" role="dialog" aria-modal="true" aria-labelledby="warnModalTitle">
+    <div class="warn-modal-box" id="warnModalBox">
+      <div class="warn-modal-icon-ring">
+        <svg class="warn-modal-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="17" r="1" fill="currentColor"/>
+        </svg>
+      </div>
+      <h2 class="warn-modal-title" id="warnModalTitle">No se pudo realizar el análisis</h2>
+      <p class="warn-modal-desc" id="warnModalDesc">Asegúrate de que la imagen muestre claramente una planta de albahaca y vuelve a intentarlo.</p>
+      <button class="warn-modal-btn" id="warnModalBtn">Entendido</button>
+    </div>
+  </div>
+
+  <!-- Modal Confirmar Eliminación -->
+  <div class="warn-modal-overlay" id="deleteModalOverlay" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="warn-modal-box" style="background: var(--bg-card); border: 1px solid var(--border); box-shadow: 0 12px 40px rgba(0,0,0,0.15);">
+      <div class="warn-modal-icon-ring" style="color: #ef4444; background: #fee2e2; border-color: #fecaca; box-shadow: none; animation: none;">
+        <svg class="warn-modal-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="warn-modal-title" id="deleteModalTitle" style="color: var(--txt);">Eliminar registro</h2>
+      <p class="warn-modal-desc" style="color: var(--txt-s);">¿Estás seguro de que deseas eliminar este registro del historial? Esta acción no se puede deshacer.</p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="warn-modal-btn" id="deleteModalCancelBtn" style="background: transparent; border: 1px solid var(--border); color: var(--txt); box-shadow: none;">Cancelar</button>
+        <button class="warn-modal-btn" id="deleteModalConfirmBtn" style="background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detalles del Análisis -->
+  <div class="warn-modal-overlay" id="detailsModalOverlay" role="dialog" aria-modal="true" aria-labelledby="detailsModalTitle">
+    <div class="warn-modal-box" style="background: var(--bg-card); border: 1px solid var(--border); box-shadow: 0 12px 40px rgba(0,0,0,0.15); max-width: 500px; padding: 24px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px;">
+        <div>
+          <h2 class="warn-modal-title" id="detailsModalTitle" style="margin: 0; font-size: 1.1rem; color: var(--txt);">Detalles del Análisis</h2>
+          <span id="detailsModalId" style="font-size: 0.85rem; color: var(--txt-s);"></span>
+        </div>
+        <button id="detailsModalCloseIcon" style="background: none; border: none; font-size: 20px; color: var(--txt-s); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+      
+      <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 24px;">
+        <div id="detailsModalImgWrap" style="flex-shrink: 0; width: 120px; height: 120px; border-radius: 8px; overflow: hidden; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;">
+          <img id="detailsModalImg" src="" alt="Miniatura" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+          <span id="detailsModalImgPlaceholder" style="font-size: 32px;">🌿</span>
+        </div>
+        <div style="flex-grow: 1;">
+          <div style="margin-bottom: 12px;">
+            <span style="font-size: 12px; color: var(--txt-s); display: block; margin-bottom: 4px;">Diagnóstico</span>
+            <strong id="detailsModalDiag" style="color: var(--txt); font-size: 1.1rem;"></strong>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <span style="font-size: 12px; color: var(--txt-s); display: block; margin-bottom: 4px;">Confianza</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="flex-grow: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden;">
+                <div id="detailsModalConfBar" style="height: 100%; border-radius: 4px;"></div>
+              </div>
+              <span id="detailsModalConfText" style="font-weight: 600; font-size: 13px; color: var(--txt);"></span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 16px;">
+            <div>
+              <span style="font-size: 12px; color: var(--txt-s); display: block; margin-bottom: 2px;">Tipo</span>
+              <span id="detailsModalTypeBadge" style="font-size: 12px; font-weight: 600;"></span>
+            </div>
+            <div>
+              <span style="font-size: 12px; color: var(--txt-s); display: block; margin-bottom: 2px;">Fecha</span>
+              <span id="detailsModalDate" style="font-size: 12px; color: var(--txt);"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: right;">
+        <button class="warn-modal-btn" id="detailsModalCloseBtn" style="background: var(--cp); color: #fff; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="galeria-modal" id="galeriaModal" role="dialog" aria-modal="true" aria-label="Vista completa de imagen"
+    style="display:none;">
+    <div class="galeria-modal-overlay" id="galeriaModalOverlay"></div>
+    <div class="galeria-modal-box">
+      <button class="galeria-modal-close" id="galeriaModalClose" title="Cerrar">✕</button>
+      <div class="galeria-modal-img-wrap">
+        <img class="galeria-modal-img" id="galeriaModalImg" src="" alt="Imagen diagnóstico">
+      </div>
+      <div class="galeria-modal-info">
+        <div class="galeria-modal-diag" id="galeriaModalDiag"></div>
+        <div class="galeria-modal-meta">
+          <span class="galeria-modal-fecha" id="galeriaModalFecha"></span>
+          <span class="galeria-modal-conf" id="galeriaModalConf"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js?v=2.0"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</body>
+
+</html>

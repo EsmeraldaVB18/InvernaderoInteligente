@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="StyleLogin.css">
+  <title>Invernadero Inteligente — Crear cuenta</title>
+  <style>
+    .sa-box {
+      max-width: 460px;
+      width: 100%;
+      background: #fff;
+      border-radius: 22px;
+      box-shadow: 0 6px 40px rgba(0,0,0,.08);
+      padding: 2.6rem 2.2rem;
+      margin: auto;
+    }
+    .sa-logo { font-size: 2.2rem; text-align: center; margin-bottom: .3rem; }
+    .sa-title { font-size: 1.4rem; font-weight: 800; color: #1a3a2a; text-align: center; margin-bottom: .3rem; }
+    .sa-sub { font-size: .87rem; color: #8aab96; text-align: center; margin-bottom: 1.8rem; }
+
+    .field { margin-bottom: 1rem; }
+    .field label {
+      display: block; font-size: .78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .8px;
+      color: #666; margin-bottom: 6px;
+    }
+    .field input, .field select {
+      width: 100%; height: 46px; padding: 0 14px;
+      border: 1.5px solid #e8e8e8; border-radius: 10px;
+      font-size: .93rem; outline: none; font-family: inherit;
+      background: #fafafa; color: #222;
+      transition: border-color .18s, background .18s;
+    }
+    .field input:focus, .field select:focus {
+      border-color: #2e7d32; background: #fff;
+    }
+    .field input::placeholder { color: #ccc; }
+
+    /* campo contraseña con ojo */
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 42px; }
+    .pw-eye {
+      position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer; font-size: 15px; color: #ccc;
+      user-select: none;
+    }
+    .pw-eye:hover { color: #2e7d32; }
+
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .err-msg {
+      display: none; background: #fff0f0;
+      border: 1px solid #ffd0d0; color: #b71c1c;
+      border-radius: 9px; padding: 10px 13px;
+      font-size: .85rem; margin-bottom: 1rem;
+    }
+    .err-msg.show { display: block; }
+
+    .btn-send {
+      width: 100%; height: 48px;
+      background: #2e7d32; color: #fff; border: none;
+      border-radius: 10px; font-size: .95rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: background .2s; margin-top: .5rem;
+    }
+    .btn-send:hover { background: #1b5e20; }
+
+    .a-back {
+      display: block; text-align: center;
+      font-size: .84rem; color: #2e7d32; text-decoration: none;
+      margin-top: 1.2rem; font-weight: 600;
+    }
+    .a-back:hover { text-decoration: underline; }
+
+    /* pantalla éxito */
+    .success-screen { display: none; text-align: center; padding: 1rem 0; }
+    .success-screen .s-icon { font-size: 3.8rem; margin-bottom: .8rem; }
+    .success-screen h2 { font-size: 1.25rem; font-weight: 800; color: #1a3a2a; margin-bottom: .5rem; }
+    .success-screen p { font-size: .9rem; color: #8aab96; line-height: 1.7; margin-bottom: 1.6rem; }
+    .success-screen .btn-send { width: auto; padding: 0 2rem; display: inline-block; text-decoration: none; line-height: 48px; }
+  </style>
+</head>
+<body>
+<div class="sa-box">
+
+  <!-- FORMULARIO -->
+  <div id="formSection">
+    <div class="sa-logo">🌿</div>
+    <div class="sa-title">Crear cuenta</div>
+    <div class="sa-sub">Solo necesitas unos datos para empezar.</div>
+
+    <div class="err-msg" id="errMsg">Por favor completa todos los campos.</div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Nombre</label>
+        <input type="text" id="fNombre" placeholder="Ana" autocomplete="given-name">
+      </div>
+      <div class="field">
+        <label>Apellido</label>
+        <input type="text" id="fApellido" placeholder="López" autocomplete="family-name">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input type="email" id="fEmail" placeholder="ana@correo.com" autocomplete="email">
+    </div>
+
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="fUsuario" placeholder="analopez" autocomplete="username">
+    </div>
+
+    <div class="field">
+      <label>Contraseña</label>
+      <div class="pw-wrap">
+        <input type="password" id="fPass" placeholder="••••••••" autocomplete="new-password">
+        <span class="pw-eye" id="eyePass">👁️</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Confirmar contraseña</label>
+      <div class="pw-wrap">
+        <input type="password" id="fPass2" placeholder="••••••••" autocomplete="new-password">
+        <span class="pw-eye" id="eyePass2">👁️</span>
+      </div>
+    </div>
+
+    <button class="btn-send" id="btnEnviar">Crear cuenta</button>
+
+    <a href="login.html" class="a-back">← Ya tengo cuenta</a>
+  </div>
+
+  <!-- PANTALLA ÉXITO -->
+  <div class="success-screen" id="successSection">
+    <div class="s-icon">🎉</div>
+    <h2>¡Cuenta creada!</h2>
+    <p>Tu cuenta ha sido creada exitosamente. Ya puedes iniciar sesión para acceder al panel.</p>
+    <a href="login.html" class="btn-send">Ir al inicio de sesión</a>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Mostrar/ocultar contraseña
+  const eyePass = document.getElementById("eyePass");
+  const eyePass2 = document.getElementById("eyePass2");
+  const fPass = document.getElementById("fPass");
+  const fPass2 = document.getElementById("fPass2");
+
+  if (eyePass && fPass) {
+    eyePass.addEventListener("click", () => {
+      const show = fPass.type === "password";
+      fPass.type = show ? "text" : "password";
+      eyePass.textContent = show ? "🙈" : "👁️";
+    });
+  }
+
+  if (eyePass2 && fPass2) {
+    eyePass2.addEventListener("click", () => {
+      const show = fPass2.type === "password";
+      fPass2.type = show ? "text" : "password";
+      eyePass2.textContent = show ? "🙈" : "👁️";
+    });
+  }
+
+  // Enviar formulario de registro
+  document.getElementById("btnEnviar").addEventListener("click", () => {
+    const nombre   = document.getElementById("fNombre").value.trim();
+    const apellido = document.getElementById("fApellido").value.trim();
+    const email    = document.getElementById("fEmail").value.trim();
+    const usuario  = document.getElementById("fUsuario").value.trim();
+    const pass     = document.getElementById("fPass").value;
+    const pass2    = document.getElementById("fPass2").value;
+    const errMsg   = document.getElementById("errMsg");
+
+    if (!nombre || !apellido || !email || !usuario || !pass || !pass2) {
+        errMsg.textContent = "Por favor completa todos los campos.";
+        errMsg.classList.add("show");
+        return;
+    }
+
+    if (!email.includes("@")) {
+        errMsg.textContent = "Ingresa un correo válido.";
+        errMsg.classList.add("show");
+        return;
+    }
+
+    if (pass.length < 6) {
+        errMsg.textContent = "La contraseña debe tener al menos 6 caracteres.";
+        errMsg.classList.add("show");
+        return;
+    }
+
+    if (pass !== pass2) {
+        errMsg.textContent = "Las contraseñas no coinciden.";
+        errMsg.classList.add("show");
+        return;
+    }
+
+    errMsg.classList.remove("show");
+    fetch("php/registro.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body:
+            "nombre=" + encodeURIComponent(nombre) +
+            "&apellido=" + encodeURIComponent(apellido) +
+            "&correo=" + encodeURIComponent(email) +
+            "&usuario=" + encodeURIComponent(usuario) +
+            "&password=" + encodeURIComponent(pass)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if (data.success) {
+            document.getElementById("formSection").style.display = "none";
+            document.getElementById("successSection").style.display = "block";
+        } else {
+            errMsg.textContent = data.message;
+            errMsg.classList.add("show");
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        errMsg.textContent = "Error de conexión con PHP";
+        errMsg.classList.add("show");
+    });
+  });
+});
+</script>
+</body>
+</html>

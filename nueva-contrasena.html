@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="StyleLogin.css">
+  <link rel="stylesheet" href="ContraseñaStyle.css">
+  <title>Invernadero Inteligente — Nueva contraseña</title>
+</head>
+<body>
+<div class="fp-box">
+  <div class="fp-logo">🌿</div>
+  <div class="fp-title">Nueva contraseña</div>
+  <div class="fp-sub">Crea una contraseña segura para tu cuenta.</div>
+
+  <div id="formContenido">
+    <div class="field">
+      <label for="pass1">Nueva contraseña</label>
+      <input type="password" id="pass1" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label for="pass2">Confirmar contraseña</label>
+      <input type="password" id="pass2" placeholder="Repite la contraseña" autocomplete="new-password">
+    </div>
+
+    <div id="msgErr" class="msg-err" style="display:none;"></div>
+
+    <button class="btn-send" id="btnCambiar">Guardar nueva contraseña</button>
+  </div>
+
+  <div class="msg-ok" id="msgOk" style="display:none;">
+    ✅ Contraseña actualizada correctamente.
+    <br><br>
+    <a href="login.html" class="a-back">Iniciar sesión →</a>
+  </div>
+
+  <div id="msgTokenErr" class="msg-err" style="display:none; margin-top:1rem;"></div>
+
+  <div style="text-align:center;margin-top:1.4rem">
+    <a href="login.html" class="a-back">← Volver al inicio de sesión</a>
+  </div>
+</div>
+
+<style>
+  .msg-err {
+    background: #fee2e2;
+    color: #991b1b;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: .88rem;
+    text-align: center;
+    margin-bottom: .6rem;
+  }
+  #btnCambiar:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  // Obtener token de la URL
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+
+  if (!token) {
+    document.getElementById('formContenido').style.display = 'none';
+    const errDiv = document.getElementById('msgTokenErr');
+    errDiv.textContent = 'Enlace inválido. Solicita una nueva recuperación de contraseña.';
+    errDiv.style.display = 'block';
+  }
+
+  const btnCambiar = document.getElementById('btnCambiar');
+  const msgErr     = document.getElementById('msgErr');
+  const msgOk      = document.getElementById('msgOk');
+
+  function mostrarError(txt) {
+    msgErr.textContent = txt;
+    msgErr.style.display = 'block';
+  }
+
+  btnCambiar.addEventListener('click', () => {
+    const p1 = document.getElementById('pass1').value;
+    const p2 = document.getElementById('pass2').value;
+
+    msgErr.style.display = 'none';
+
+    if (!p1 || p1.length < 6) {
+      return mostrarError('La contraseña debe tener al menos 6 caracteres.');
+    }
+    if (p1 !== p2) {
+      return mostrarError('Las contraseñas no coinciden.');
+    }
+
+    btnCambiar.disabled = true;
+    btnCambiar.textContent = 'Guardando...';
+
+    fetch('php/cambiar_password.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'token=' + encodeURIComponent(token) + '&password=' + encodeURIComponent(p1)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('formContenido').style.display = 'none';
+        msgOk.style.display = 'block';
+      } else {
+        mostrarError(data.message || 'Error al cambiar la contraseña.');
+      }
+    })
+    .catch(() => {
+      mostrarError('Error de conexión con el servidor.');
+    })
+    .finally(() => {
+      btnCambiar.disabled = false;
+      btnCambiar.textContent = 'Guardar nueva contraseña';
+    });
+  });
+</script>
+</body>
+</html>

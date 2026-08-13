@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="stylesheet" href="StyleLogin.css?v=2.0">
+  <title>Invernadero Inteligente — Iniciar sesión</title>
+  <script>
+    (function () {
+      const enSession = sessionStorage.getItem("logueado") === "true";
+      const enLocal = localStorage.getItem("logueado") === "true";
+
+      if (enSession || enLocal) {
+        window.location.replace("index.html");
+      }
+    })();
+
+    window.addEventListener("pageshow", function (event) {
+      const enSession = sessionStorage.getItem("logueado") === "true";
+      const enLocal = localStorage.getItem("logueado") === "true";
+      if (enSession || enLocal) {
+        window.location.replace("index.html");
+      }
+    });
+  </script>
+</head>
+
+<body style="display: none;">
+  <script>
+    if (sessionStorage.getItem("logueado") !== "true" && localStorage.getItem("logueado") !== "true") {
+      document.body.style.display = "";
+    }
+  </script>
+
+  <div class="login-box">
+
+    <!-- IZQUIERDA -->
+    <div class="left">
+      <div class="brand">
+        <div class="brand-icon">🌿</div>
+        <div class="brand-name">
+          Invernadero Inteligente
+          <small>Sistema de análisis con IA</small>
+        </div>
+      </div>
+
+      <div class="left-body">
+        <h2>Protege tu cultivo<br>con <em>tecnología<br>inteligente</em></h2>
+        <p>Detecta plagas y enfermedades en tu albahaca antes de que se propaguen.</p>
+        <div class="feats">
+          <div class="feat">
+            <div class="feat-dot"></div>Diagnóstico con inteligencia artificial
+          </div>
+          <div class="feat">
+            <div class="feat-dot"></div>Historial y reportes automáticos
+          </div>
+          <div class="feat">
+            <div class="feat-dot"></div>Monitoreo continuo del invernadero
+          </div>
+          <div class="feat">
+            <div class="feat-dot"></div>Recomendaciones personalizadas
+          </div>
+        </div>
+      </div>
+
+      <div class="left-foot">&copy; 2026 Invernadero Inteligente</div>
+    </div>
+
+    <!-- DERECHA -->
+    <div class="right">
+      <div class="form-head">
+        <div class="eyebrow">Bienvenido de vuelta</div>
+        <h1>Iniciar sesión</h1>
+        <p>Ingresa tus datos para continuar al sistema.</p>
+      </div>
+
+      <div class="msg err" id="msgErr"><span>⚠️</span><span id="errTxt"></span></div>
+      <div class="msg ok" id="msgOk"><span>✅</span><span>Acceso concedido. Redirigiendo...</span></div>
+
+      <div class="field">
+        <label for="iUser">Usuario</label>
+        <div class="iw">
+          <span class="ico">👤</span>
+          <input type="text" id="iUser" placeholder="Nombre de usuario" autocomplete="username">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="iPass">Contraseña</label>
+        <div class="iw">
+          <span class="ico">🔒</span>
+          <input type="password" id="iPass" placeholder="••••••••" autocomplete="current-password">
+          <span class="eye" id="eye">👁️</span>
+        </div>
+      </div>
+
+      <div class="row-opts">
+        <a href="#" id="aForgot" class="a-forgot">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button class="btn-main" id="btnLogin">
+        <div class="sp" id="sp"></div>
+        <span id="btnTxt">Iniciar sesión</span>
+      </button>
+
+      <div class="divider">o</div>
+
+      <div class="form-foot">
+        ¿No tienes cuenta? <a href="#" id="aSolicitar">Crear cuenta</a>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/scriptLogin.js?v=2.0" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,189 @@
+    .fp-box {
+      max-width: 440px;
+      width: 100%;
+      margin: auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .10);
+      padding: 2.4rem 2rem;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f6f3;
+    }
+
+    .fp-logo {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: .4rem;
+    }
+
+    .fp-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a3a2a;
+      text-align: center;
+      margin-bottom: .3rem;
+    }
+
+    .fp-sub {
+      font-size: .88rem;
+      color: #6b8c75;
+      text-align: center;
+      margin-bottom: 1.6rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.4rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 9px;
+      font-size: .86rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      color: #374151;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .tab:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .tab:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .tab.active {
+      background: #e8f5ee;
+      border-color: #4caf80;
+      color: #1a6640;
+      font-weight: 600;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: .83rem;
+      color: #4a7a5a;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #d0e4d8;
+      border-radius: 10px;
+      font-size: .92rem;
+      outline: none;
+      transition: border .2s;
+    }
+
+    .field input:focus {
+      border-color: #4caf80;
+    }
+
+    .hint {
+      font-size: .78rem;
+      color: #8aab96;
+      margin-top: 4px;
+    }
+
+    .btn-send {
+      width: 100%;
+      padding: 12px;
+      background: #2e7d32;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: .4rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-send:hover {
+      background: #1b5e20;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn-send:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .msg-ok {
+      display: none;
+      background: #e8f5ee;
+      color: #1b5e38;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: .88rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .msg-ok.show {
+      display: block;
+    }
+
+    /* paso 2: código */
+    .step2 {
+      display: none;
+    }
+
+    .code-inputs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 1.2rem 0;
+    }
+
+    .code-inputs input {
+      width: 44px;
+      height: 52px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      border: 1.5px solid #d0e4d8;
+      border-radius: 10px;
+    }
+
+    .code-inputs input:focus {
+      border-color: #4caf80;
+      outline: none;
+    }
+
+    .a-back {
+      display: inline-block;
+      font-size: .83rem;
+      color: #4caf80;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 1rem;
+    }
+
+    .a-back:hover {
+      text-decoration: underline;
+    }
