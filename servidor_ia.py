@@ -162,13 +162,14 @@ def predict():
         # EJECUTAR YOLO
         # ==========================================
 
-        results = model.predict(
-            source=image,
-            imgsz=320,
-            conf=0.25,
-            device="cpu",
-            verbose=False
-        )
+      results = model.predict(
+    source=image,
+    imgsz=256,
+    conf=0.25,
+    device="cpu",
+    verbose=False,
+    max_det=5
+)
 
         predictions = []
 
