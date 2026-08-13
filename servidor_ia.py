@@ -6,22 +6,17 @@ import base64
 import io
 import os
 
-
 app = Flask(__name__)
-
 
 # ==========================================
 # CORS
 # ==========================================
 
-CORS(
-    app,
-    resources={
-        r"/*": {
-            "origins": "*"
-        }
+CORS(app, resources={
+    r"/*": {
+        "origins": "*"
     }
-)
+})
 
 
 # ==========================================
@@ -92,15 +87,19 @@ try:
 
     model = YOLO("best.pt")
 
-    print("Modelo YOLO cargado correctamente")
+    print("==========================================")
+    print("MODELO YOLO CARGADO CORRECTAMENTE")
+    print("CLASES DEL MODELO:", model.names)
+    print("==========================================")
 
 except Exception as e:
 
     model = None
 
-    print(
-        f"Error al cargar el modelo: {e}"
-    )
+    print("==========================================")
+    print("ERROR AL CARGAR EL MODELO")
+    print(str(e))
+    print("==========================================")
 
 
 # ==========================================
@@ -111,12 +110,8 @@ except Exception as e:
 def home():
 
     return jsonify({
-
         "success": True,
-
-        "message":
-            "Servidor de IA del Invernadero funcionando"
-
+        "message": "Servidor de IA del Invernadero funcionando"
     })
 
 
@@ -136,12 +131,8 @@ def predict():
         if model is None:
 
             return jsonify({
-
                 "success": False,
-
-                "message":
-                    "El modelo de IA no pudo cargarse."
-
+                "message": "El modelo de IA no pudo cargarse."
             }), 500
 
 
@@ -149,35 +140,23 @@ def predict():
         # RECIBIR JSON
         # ==========================================
 
-        data = request.get_json(
-            silent=True
-        )
-
+        data = request.get_json(silent=True)
 
         if not data or "image" not in data:
 
             return jsonify({
-
                 "success": False,
-
-                "message":
-                    "No se recibió ninguna imagen."
-
+                "message": "No se recibió ninguna imagen."
             }), 400
 
 
         img_data = data["image"]
 
-
         if not img_data:
 
             return jsonify({
-
                 "success": False,
-
-                "message":
-                    "La imagen está vacía."
-
+                "message": "La imagen está vacía."
             }), 400
 
 
@@ -187,10 +166,7 @@ def predict():
 
         if "," in img_data:
 
-            img_data = img_data.split(
-                ",",
-                1
-            )[1]
+            img_data = img_data.split(",", 1)[1]
 
 
         # ==========================================
@@ -204,54 +180,69 @@ def predict():
                 validate=True
             )
 
-
             image = Image.open(
                 io.BytesIO(image_bytes)
             ).convert("RGB")
 
+        except Exception as e:
 
-        except Exception:
+            print("ERROR AL DECODIFICAR IMAGEN:", str(e))
 
             return jsonify({
-
                 "success": False,
-
-                "message":
-                    "La imagen no tiene un formato válido."
-
+                "message": "La imagen no tiene un formato válido."
             }), 400
 
 
         # ==========================================
-        # REDUCIR TAMAÑO DE IMAGEN
+        # INFORMACIÓN DE LA IMAGEN
+        # ==========================================
+
+        print("==========================================")
+        print("NUEVO ANÁLISIS")
+        print("Tamaño original:", image.size)
+
+
+        # ==========================================
+        # REDUCIR IMAGEN
         # ==========================================
 
         max_size = 640
-
 
         image.thumbnail(
             (max_size, max_size),
             Image.Resampling.LANCZOS
         )
 
+        print("Tamaño procesado:", image.size)
+
 
         # ==========================================
         # EJECUTAR YOLO
         # ==========================================
 
+        print("Ejecutando YOLO...")
+
+
         results = model.predict(
 
             source=image,
 
-            imgsz=320,
+            # Resolución mayor para detectar detalles
+            imgsz=640,
 
-            conf=0.25,
+            # Confianza inicial baja para no perder detecciones
+            conf=0.15,
 
+            # Render utiliza CPU
             device="cpu",
 
             verbose=False
 
         )
+
+
+        print("YOLO terminó el análisis")
 
 
         # ==========================================
@@ -268,7 +259,6 @@ def predict():
         for result in results:
 
             if result.boxes is None:
-
                 continue
 
 
@@ -278,11 +268,9 @@ def predict():
                     box.cls[0].item()
                 )
 
-
                 class_name = str(
                     model.names[class_id]
                 ).lower().strip()
-
 
                 confidence = float(
                     box.conf[0].item()
@@ -291,13 +279,24 @@ def predict():
 
                 predictions.append({
 
-                    "class":
-                        class_name,
+                    "class": class_name,
 
-                    "confidence":
-                        confidence
+                    "confidence": confidence
 
                 })
+
+
+        # ==========================================
+        # MOSTRAR RESULTADOS EN LOGS
+        # ==========================================
+
+        predictions.sort(
+            key=lambda x: x["confidence"],
+            reverse=True
+        )
+
+
+        print("PREDICCIONES YOLO:", predictions)
 
 
         # ==========================================
@@ -306,28 +305,20 @@ def predict():
 
         if not predictions:
 
+            print("YOLO NO DETECTÓ NINGUNA CLASE")
+
+            print("==========================================")
+
             return jsonify({
 
                 "success": False,
 
                 "message":
-                    "Imagen no válida para el análisis."
+                    "El modelo no detectó ninguna clase.",
+
+                "predictions": []
 
             }), 200
-
-
-        # ==========================================
-        # ORDENAR POR CONFIANZA
-        # ==========================================
-
-        predictions.sort(
-
-            key=lambda x:
-                x["confidence"],
-
-            reverse=True
-
-        )
 
 
         # ==========================================
@@ -336,17 +327,17 @@ def predict():
 
         mejor = predictions[0]
 
-
         clase_detectada = mejor["class"]
 
-
         confianza = round(
-
             mejor["confidence"] * 100,
-
             1
-
         )
+
+
+        print("MEJOR CLASE:", clase_detectada)
+
+        print("CONFIANZA:", confianza)
 
 
         # ==========================================
@@ -361,14 +352,43 @@ def predict():
             umbral_minimo = 75
 
 
+        print("UMBRAL REQUERIDO:", umbral_minimo)
+
+
+        # ==========================================
+        # COMPROBAR CONFIANZA
+        # ==========================================
+
         if confianza < umbral_minimo:
+
+            print(
+                "CONFIANZA INSUFICIENTE:",
+                confianza,
+                "<",
+                umbral_minimo
+            )
+
+            print("==========================================")
+
 
             return jsonify({
 
                 "success": False,
 
                 "message":
-                    "Imagen no válida para el análisis."
+                    "Imagen no válida para el análisis.",
+
+                "clase_detectada":
+                    clase_detectada,
+
+                "confianza":
+                    confianza,
+
+                "umbral_requerido":
+                    umbral_minimo,
+
+                "predictions":
+                    predictions
 
             }), 200
 
@@ -379,14 +399,23 @@ def predict():
 
         if clase_detectada not in MAPA_CLASES:
 
+            print(
+                "CLASE NO CONFIGURADA:",
+                clase_detectada
+            )
+
+            print("==========================================")
+
+
             return jsonify({
 
                 "success": False,
 
-                "message": (
-                    f"Clase '{clase_detectada}' "
-                    "no está configurada."
-                )
+                "message":
+                    f"Clase '{clase_detectada}' no está configurada.",
+
+                "predictions":
+                    predictions
 
             }), 200
 
@@ -401,10 +430,10 @@ def predict():
 
 
         # ==========================================
-        # RESPUESTA
+        # RESPUESTA FINAL
         # ==========================================
 
-        return jsonify({
+        respuesta = {
 
             "success": True,
 
@@ -423,7 +452,17 @@ def predict():
             "recomendacion":
                 info["recomendacion"]
 
-        }), 200
+        }
+
+
+        print("ANÁLISIS EXITOSO")
+
+        print(respuesta)
+
+        print("==========================================")
+
+
+        return jsonify(respuesta), 200
 
 
     # ==========================================
@@ -432,18 +471,18 @@ def predict():
 
     except Exception as e:
 
-        print(
-            f"ERROR EN /predict: {str(e)}"
-        )
+        print("==========================================")
+        print("ERROR EN /predict:")
+        print(str(e))
+        print("==========================================")
 
 
         return jsonify({
 
             "success": False,
 
-            "message": (
+            "message":
                 f"Error al analizar la imagen: {str(e)}"
-            )
 
         }), 500
 
@@ -455,22 +494,13 @@ def predict():
 if __name__ == "__main__":
 
     port = int(
-
         os.environ.get(
-
             "PORT",
-
             5000
-
         )
-
     )
 
-
     app.run(
-
         host="0.0.0.0",
-
         port=port
-
     )
