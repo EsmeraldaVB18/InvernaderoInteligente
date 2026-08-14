@@ -478,48 +478,26 @@ analizarBtn.addEventListener("click", async () => {
 // LLAMADA A LA IA REAL
 
 async function analizarConMiIA(base64) {
+  const formData = new FormData();
+  formData.append("imagen_base64", base64);
 
-  const respuesta = await fetch(
-    "https://invernadero-inteligente-ia.onrender.com/predict",
-    {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
-        image: base64
-      })
-    }
-  );
-
+  const respuesta = await fetch("php/analizar_ia.php", {
+    method: "POST",
+    body: formData
+  });
 
   const datos = await respuesta.json();
 
-
-  if (!respuesta.ok || !datos.success) {
-
-    throw new Error(
-      datos.message ||
-      "Error desconocido al analizar la imagen."
-    );
-
+  if (!datos.success) {
+    throw new Error(datos.message || "Error desconocido al analizar la imagen.");
   }
 
-
   return {
-
     diagnostico: datos.diagnostico,
-
     tipo: datos.tipo,
-
     confianza: datos.confianza,
-
     descripcion: datos.descripcion,
-
     recomendacion: datos.recomendacion
-
   };
 }
 
